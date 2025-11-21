@@ -111,7 +111,36 @@ This option is useful in scenarios where OAuth credential management is centrali
 
 ### 📦 2. Installation
 
-MCP Atlassian is distributed as a Docker image. This is the recommended way to run the server, especially for IDE integration. Ensure you have Docker installed.
+MCP Atlassian can be installed in two ways:
+
+#### Option A: Using uvx (Recommended for local development)
+
+uvx allows you to run the server without Docker, similar to `npx` for Node.js. This is ideal for local development and lightweight deployments.
+
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/):
+   ```bash
+   # macOS/Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Windows
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+2. Run the server directly:
+   ```bash
+   # uvx will automatically install and run rokrokss-mcp-atlassian
+   uvx rokrokss-mcp-atlassian
+
+   # With verbose logging
+   uvx rokrokss-mcp-atlassian -v
+
+   # OAuth setup wizard
+   uvx rokrokss-mcp-atlassian --oauth-setup
+   ```
+
+#### Option B: Using Docker
+
+Docker provides isolation and is recommended for production deployments.
 
 ```bash
 # Pull Pre-built Image
@@ -132,10 +161,10 @@ MCP Atlassian is designed to be used with AI assistants through IDE integration.
 
 ### ⚙️ Configuration Methods
 
-There are two main approaches to configure the Docker container:
+You can run MCP Atlassian using either **uvx** (lightweight, no Docker) or **Docker** (isolated environment). Both methods support:
 
 1. **Passing Variables Directly** (shown in examples below)
-2. **Using an Environment File** with `--env-file` flag (shown in collapsible sections)
+2. **Using an Environment File** (shown in collapsible sections)
 
 > [!NOTE]
 > Common environment variables include:
@@ -151,6 +180,57 @@ There are two main approaches to configure the Docker container:
 
 
 ### 📝 Configuration Examples
+
+#### Using uvx (Lightweight, No Docker Required)
+
+**Cloud Configuration:**
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "CONFLUENCE_URL": "https://your-company.atlassian.net/wiki",
+        "CONFLUENCE_USERNAME": "your.email@company.com",
+        "CONFLUENCE_API_TOKEN": "your_confluence_api_token",
+        "JIRA_URL": "https://your-company.atlassian.net",
+        "JIRA_USERNAME": "your.email@company.com",
+        "JIRA_API_TOKEN": "your_jira_api_token"
+      }
+    }
+  }
+}
+```
+
+<details>
+<summary>Server/Data Center Configuration with uvx</summary>
+
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "CONFLUENCE_URL": "https://confluence.your-company.com",
+        "CONFLUENCE_PERSONAL_TOKEN": "your_confluence_pat",
+        "CONFLUENCE_SSL_VERIFY": "false",
+        "JIRA_URL": "https://jira.your-company.com",
+        "JIRA_PERSONAL_TOKEN": "your_jira_pat",
+        "JIRA_SSL_VERIFY": "false"
+      }
+    }
+  }
+}
+```
+
+> [!NOTE]
+> Set `CONFLUENCE_SSL_VERIFY` and `JIRA_SSL_VERIFY` to "false" only if you have self-signed certificates.
+
+</details>
+
+#### Using Docker (Isolated Environment)
 
 **Method 1 (Passing Variables Directly):**
 ```json
@@ -251,7 +331,39 @@ For Server/Data Center deployments, use direct variable passing:
 
 These examples show how to configure `mcp-atlassian` in your IDE (like Cursor or Claude Desktop) when using OAuth 2.0 for Atlassian Cloud.
 
-**Example for Standard OAuth 2.0 Flow (using Setup Wizard):**
+**Using uvx with OAuth 2.0 Flow:**
+
+Run the OAuth setup wizard first:
+```bash
+uvx rokrokss-mcp-atlassian --oauth-setup
+```
+
+Then configure your IDE:
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "https://your-company.atlassian.net",
+        "CONFLUENCE_URL": "https://your-company.atlassian.net/wiki",
+        "ATLASSIAN_OAUTH_CLIENT_ID": "YOUR_OAUTH_APP_CLIENT_ID",
+        "ATLASSIAN_OAUTH_CLIENT_SECRET": "YOUR_OAUTH_APP_CLIENT_SECRET",
+        "ATLASSIAN_OAUTH_REDIRECT_URI": "http://localhost:8080/callback",
+        "ATLASSIAN_OAUTH_SCOPE": "read:jira-work write:jira-work read:confluence-content.all write:confluence-content offline_access",
+        "ATLASSIAN_OAUTH_CLOUD_ID": "YOUR_CLOUD_ID_FROM_SETUP_WIZARD"
+      }
+    }
+  }
+}
+```
+
+> [!NOTE]
+> - uvx automatically stores OAuth tokens in `~/.mcp-atlassian/` (no volume mount needed)
+> - Run `uvx rokrokss-mcp-atlassian --oauth-setup` to get your `ATLASSIAN_OAUTH_CLOUD_ID`
+
+**Using Docker with OAuth 2.0 Flow:**
 
 This configuration is for when you use the server's built-in OAuth client and have completed the [OAuth setup wizard](#c-oauth-20-authentication-cloud---advanced).
 
@@ -295,10 +407,29 @@ This configuration is for when you use the server's built-in OAuth client and ha
 >   - `JIRA_URL` and `CONFLUENCE_URL` for your Cloud instances are always required.
 >   - The volume mount (`-v .../.mcp-atlassian:/home/app/.mcp-atlassian`) is crucial for persisting the OAuth tokens obtained by the wizard, enabling automatic refresh.
 
-**Example for Pre-existing Access Token (BYOT - Bring Your Own Token):**
+**Pre-existing Access Token (BYOT - Bring Your Own Token):**
 
-This configuration is for when you are providing your own externally managed OAuth 2.0 access token.
+This configuration works with both uvx and Docker when you are providing your own externally managed OAuth 2.0 access token.
 
+With uvx:
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "https://your-company.atlassian.net",
+        "CONFLUENCE_URL": "https://your-company.atlassian.net/wiki",
+        "ATLASSIAN_OAUTH_CLOUD_ID": "YOUR_KNOWN_CLOUD_ID",
+        "ATLASSIAN_OAUTH_ACCESS_TOKEN": "YOUR_PRE_EXISTING_OAUTH_ACCESS_TOKEN"
+      }
+    }
+  }
+}
+```
+
+With Docker:
 ```json
 {
   "mcpServers": {
@@ -487,6 +618,24 @@ asyncio.run(main())
 
 **For Confluence Cloud only:**
 
+With uvx:
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "CONFLUENCE_URL": "https://your-company.atlassian.net/wiki",
+        "CONFLUENCE_USERNAME": "your.email@company.com",
+        "CONFLUENCE_API_TOKEN": "your_api_token"
+      }
+    }
+  }
+}
+```
+
+With Docker:
 ```json
 {
   "mcpServers": {
@@ -511,7 +660,25 @@ asyncio.run(main())
 }
 ```
 
-For Confluence Server/DC, use:
+**For Confluence Server/DC:**
+
+With uvx:
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "CONFLUENCE_URL": "https://confluence.your-company.com",
+        "CONFLUENCE_PERSONAL_TOKEN": "your_personal_token"
+      }
+    }
+  }
+}
+```
+
+With Docker:
 ```json
 {
   "mcpServers": {
@@ -536,6 +703,24 @@ For Confluence Server/DC, use:
 
 **For Jira Cloud only:**
 
+With uvx:
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "https://your-company.atlassian.net",
+        "JIRA_USERNAME": "your.email@company.com",
+        "JIRA_API_TOKEN": "your_api_token"
+      }
+    }
+  }
+}
+```
+
+With Docker:
 ```json
 {
   "mcpServers": {
@@ -560,7 +745,25 @@ For Confluence Server/DC, use:
 }
 ```
 
-For Jira Server/DC, use:
+**For Jira Server/DC:**
+
+With uvx:
+```json
+{
+  "mcpServers": {
+    "mcp-atlassian": {
+      "command": "uvx",
+      "args": ["rokrokss-mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "https://jira.your-company.com",
+        "JIRA_PERSONAL_TOKEN": "your_personal_token"
+      }
+    }
+  }
+}
+```
+
+With Docker:
 ```json
 {
   "mcpServers": {
@@ -603,6 +806,19 @@ Both transport types support single-user and multi-user authentication:
 
 1. Start the server with your chosen transport:
 
+    **Using uvx:**
+    ```bash
+    # For SSE transport
+    uvx rokrokss-mcp-atlassian --transport sse --port 9000 -vv
+
+    # OR for streamable-http transport
+    uvx rokrokss-mcp-atlassian --transport streamable-http --port 9000 -vv
+
+    # With environment file
+    uvx rokrokss-mcp-atlassian --env-file .env --transport sse --port 9000
+    ```
+
+    **Using Docker:**
     ```bash
     # For SSE transport
     docker run --rm -p 9000:9000 \
@@ -847,7 +1063,7 @@ To verify custom headers are being applied correctly:
 
 ```bash
 # Using MCP Inspector for testing
-npx @modelcontextprotocol/inspector uvx mcp-atlassian ...
+npx @modelcontextprotocol/inspector uvx rokrokss-mcp-atlassian ...
 
 # For local development version
 npx @modelcontextprotocol/inspector uv --directory /path/to/your/mcp-atlassian run mcp-atlassian ...
