@@ -1,6 +1,7 @@
 [project]
-name = "mcp-atlassian"
-dynamic = ["version"]
+name = "rokrokss-mcp-atlassian"
+# dynamic = ["version"]
+version = "1.1.0"
 description = "The Model Context Protocol (MCP) Atlassian integration is an open-source implementation that bridges Atlassian products (Jira and Confluence) with AI language models following Anthropic's MCP specification. This project enables secure, contextual AI interactions with Atlassian tools while maintaining data privacy and security. Key features include:"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,15 +33,15 @@ dependencies = [
     "tzdata>=2024.1; platform_system=='Windows'",
 ]
 [[project.authors]]
-name = "sooperset"
-email = "soomiles.dev@gmail.com"
+name = "rokrokss"
+email = "q0115643@gmail.com"
 
 [build-system]
 requires = ["hatchling", "uv-dynamic-versioning>=0.7.0"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-mcp-atlassian = "mcp_atlassian:main"
+rokrokss-mcp-atlassian = "mcp_atlassian:main"
 
 [dependency-groups]
 dev = [
@@ -148,6 +149,9 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "src.mcp_atlassian.*"
 disallow_untyped_defs = false
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_atlassian"]
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
