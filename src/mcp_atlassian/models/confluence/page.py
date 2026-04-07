@@ -96,6 +96,9 @@ class ConfluencePage(ApiModel, TimestampMixin):
     attachments: list[ConfluenceAttachment] = Field(default_factory=list)
     url: str | None = None
     emoji: str | None = None  # Page title emoji (icon shown in navigation)
+    page_width: str | None = (
+        None  # Page layout width ('full-width', 'max', or 'default')
+    )
 
     @property
     def page_content(self) -> str:
@@ -151,10 +154,10 @@ class ConfluencePage(ApiModel, TimestampMixin):
         include_body = kwargs.get("include_body", True)
 
         # Allow content override to be provided directly
-        if content_override := kwargs.get("content_override"):
-            content = content_override
+        if "content_override" in kwargs and kwargs["content_override"] is not None:
+            content = kwargs["content_override"]
         elif include_body and "body" in data:
-            body = data.get("body", {})
+            body = data.get("body") or {}
             if content_format in body:
                 content = body.get(content_format, {}).get("value", EMPTY_STRING)
 
@@ -207,7 +210,7 @@ class ConfluencePage(ApiModel, TimestampMixin):
                 url_id = container_data.get("id")
             else:
                 url_id = data.get("id")
-
+            base_url = base_url.rstrip("/")
             # Use different URL format based on whether it's cloud or server
             is_cloud = kwargs.get("is_cloud", False)
             if is_cloud:
@@ -218,8 +221,9 @@ class ConfluencePage(ApiModel, TimestampMixin):
                 # Server format: {base_url}/pages/viewpage.action?pageId={page_id}
                 url = f"{base_url}/pages/viewpage.action?pageId={url_id}"
 
-        # Extract emoji from kwargs if provided
+        # Extract emoji and page_width from kwargs if provided
         emoji = kwargs.get("emoji")
+        page_width = kwargs.get("page_width")
 
         return cls(
             id=str(data.get("id", CONFLUENCE_DEFAULT_ID)),
@@ -238,6 +242,7 @@ class ConfluencePage(ApiModel, TimestampMixin):
             attachments=attachments,
             url=url,
             emoji=emoji,
+            page_width=page_width,
         )
 
     def to_simplified_dict(self) -> dict[str, Any]:
@@ -283,5 +288,9 @@ class ConfluencePage(ApiModel, TimestampMixin):
         # Add emoji if available
         if self.emoji:
             result["emoji"] = self.emoji
+
+        # Add page_width if available
+        if self.page_width:
+            result["page_width"] = self.page_width
 
         return result

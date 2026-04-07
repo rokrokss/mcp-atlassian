@@ -53,7 +53,7 @@ def test_setup_logging_removes_existing_handlers():
 def test_setup_logging_logger_name():
     """Test that setup_logging creates logger with correct name"""
     logger = setup_logging()
-    assert logger.name == "mcp-atlassian"
+    assert logger.name == "rokrokss-mcp-atlassian"
 
 
 def test_setup_logging_logging_stream():
