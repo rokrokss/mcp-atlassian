@@ -9,7 +9,7 @@ from ..models.confluence import ConfluenceComment
 from .client import ConfluenceClient
 from .v2_adapter import ConfluenceV2Adapter
 
-logger = logging.getLogger("mcp-atlassian")
+logger = logging.getLogger("rokrokss-mcp-atlassian")
 
 
 class CommentsMixin(ConfluenceClient):

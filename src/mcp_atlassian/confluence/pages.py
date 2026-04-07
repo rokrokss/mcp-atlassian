@@ -13,7 +13,7 @@ from .client import ConfluenceClient
 from .utils import emoji_to_hex_id, extract_emoji_from_property
 from .v2_adapter import ConfluenceV2Adapter
 
-logger = logging.getLogger("mcp-atlassian")
+logger = logging.getLogger("rokrokss-mcp-atlassian")
 
 
 class PagesMixin(ConfluenceClient):

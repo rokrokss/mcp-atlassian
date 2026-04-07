@@ -6,7 +6,7 @@ from typing import Any
 
 from .base import BasePreprocessor, _extract_blocks, _restore_blocks
 
-logger = logging.getLogger("mcp-atlassian")
+logger = logging.getLogger("rokrokss-mcp-atlassian")
 
 
 def _convert_panel(params: str | None, content: str) -> str:

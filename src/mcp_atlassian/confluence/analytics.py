@@ -15,7 +15,7 @@ from requests.exceptions import HTTPError
 
 from ..models.confluence.analytics import PageViews, PageViewsBatchResponse
 
-logger = logging.getLogger("mcp-atlassian")
+logger = logging.getLogger("rokrokss-mcp-atlassian")
 
 
 class AnalyticsMixin:
