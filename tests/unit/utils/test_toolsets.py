@@ -4,6 +4,8 @@ import pytest
 
 from mcp_atlassian.utils.toolsets import (
     ALL_TOOLSETS,
+    DEFAULT_CONFLUENCE_TOOLSETS,
+    DEFAULT_JIRA_TOOLSETS,
     DEFAULT_TOOLSETS,
     TOOLSET_TAG_PREFIX,
     get_enabled_toolsets,
@@ -64,6 +66,45 @@ class TestGetEnabledToolsets:
         result = get_enabled_toolsets()
         assert result is not None
         assert result == DEFAULT_TOOLSETS | {"jira_agile"}
+
+    def test_default_jira_keyword(self, monkeypatch):
+        """Test 'default_jira' keyword returns only the Jira default toolsets."""
+        monkeypatch.setenv("TOOLSETS", "default_jira")
+        result = get_enabled_toolsets()
+        assert result == DEFAULT_JIRA_TOOLSETS
+        assert result == {
+            "jira_issues",
+            "jira_fields",
+            "jira_comments",
+            "jira_transitions",
+        }
+        assert all(name.startswith("jira_") for name in result)
+
+    def test_default_confluence_keyword(self, monkeypatch):
+        """Test 'default_confluence' keyword returns only the Confluence defaults."""
+        monkeypatch.setenv("TOOLSETS", "default_confluence")
+        result = get_enabled_toolsets()
+        assert result == DEFAULT_CONFLUENCE_TOOLSETS
+        assert result == {"confluence_pages", "confluence_comments"}
+        assert all(name.startswith("confluence_") for name in result)
+
+    def test_default_jira_and_confluence_equals_default(self, monkeypatch):
+        """Combining both default_* keywords reproduces the full 'default' set."""
+        monkeypatch.setenv("TOOLSETS", "default_jira,default_confluence")
+        result = get_enabled_toolsets()
+        assert result == DEFAULT_TOOLSETS
+
+    def test_default_jira_case_insensitive(self, monkeypatch):
+        """Keyword matching for default_jira/default_confluence is case-insensitive."""
+        monkeypatch.setenv("TOOLSETS", "Default_Jira, DEFAULT_CONFLUENCE")
+        result = get_enabled_toolsets()
+        assert result == DEFAULT_TOOLSETS
+
+    def test_default_confluence_plus_extra(self, monkeypatch):
+        """default_confluence can be combined with specific toolsets."""
+        monkeypatch.setenv("TOOLSETS", "default_confluence,confluence_attachments")
+        result = get_enabled_toolsets()
+        assert result == DEFAULT_CONFLUENCE_TOOLSETS | {"confluence_attachments"}
 
     def test_mixed_valid_and_unknown(self, monkeypatch):
         """Test 'default,typo_name' returns defaults only (typo ignored)."""

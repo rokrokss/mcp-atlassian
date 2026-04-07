@@ -144,16 +144,24 @@ ALL_TOOLSETS: dict[str, ToolsetDefinition] = {
     **CONFLUENCE_TOOLSETS,
 }
 
-DEFAULT_TOOLSETS: set[str] = {
-    name for name, defn in ALL_TOOLSETS.items() if defn.default
+DEFAULT_JIRA_TOOLSETS: set[str] = {
+    name for name, defn in JIRA_TOOLSETS.items() if defn.default
 }
+
+DEFAULT_CONFLUENCE_TOOLSETS: set[str] = {
+    name for name, defn in CONFLUENCE_TOOLSETS.items() if defn.default
+}
+
+DEFAULT_TOOLSETS: set[str] = DEFAULT_JIRA_TOOLSETS | DEFAULT_CONFLUENCE_TOOLSETS
 
 
 def get_enabled_toolsets() -> set[str]:
     """Parse the TOOLSETS env var into a set of enabled toolset names.
 
-    Supports keywords 'all' (all 21 toolsets) and 'default' (6 defaults),
-    plus comma-separated specific toolset names. Case-insensitive for keywords.
+    Supports keywords 'all' (all 21 toolsets), 'default' (6 defaults),
+    'default_jira' (4 Jira defaults), and 'default_confluence' (2 Confluence
+    defaults), plus comma-separated specific toolset names. Case-insensitive
+    for keywords.
 
     When TOOLSETS is unset or empty, returns all toolsets with a deprecation
     warning. In v0.22.0 the default will change to DEFAULT_TOOLSETS (6 core).
@@ -205,6 +213,16 @@ def get_enabled_toolsets() -> set[str]:
         elif normalized == "default":
             logger.info("TOOLSETS: 'default' keyword — adding default toolsets.")
             result |= DEFAULT_TOOLSETS
+        elif normalized == "default_jira":
+            logger.info(
+                "TOOLSETS: 'default_jira' keyword — adding default Jira toolsets."
+            )
+            result |= DEFAULT_JIRA_TOOLSETS
+        elif normalized == "default_confluence":
+            logger.info(
+                "TOOLSETS: 'default_confluence' keyword — adding default Confluence toolsets."
+            )
+            result |= DEFAULT_CONFLUENCE_TOOLSETS
         elif token in ALL_TOOLSETS:
             result.add(token)
         else:
