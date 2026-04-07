@@ -31,9 +31,9 @@ uv run pytest tests/unit/test_preprocessing.py::test_specific_function
 
 **Running the Server**:
 ```bash
-uv run mcp-atlassian                 # Start MCP server
-uv run mcp-atlassian --oauth-setup   # OAuth configuration wizard
-uv run mcp-atlassian -v              # Verbose logging mode
+uv run rokrokss-mcp-atlassian                 # Start MCP server
+uv run rokrokss-mcp-atlassian --oauth-setup   # OAuth configuration wizard
+uv run rokrokss-mcp-atlassian -v              # Verbose logging mode
 ```
 
 ## Architecture

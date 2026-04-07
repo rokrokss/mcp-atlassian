@@ -84,9 +84,9 @@ uv run pytest --cov=src/mcp_atlassian --cov-report=term-missing  # coverage
 
 ```bash
 # Running the server
-uv run mcp-atlassian                 # Start server
-uv run mcp-atlassian --oauth-setup   # OAuth wizard
-uv run mcp-atlassian -v              # Verbose mode
+uv run rokrokss-mcp-atlassian                 # Start server
+uv run rokrokss-mcp-atlassian --oauth-setup   # OAuth wizard
+uv run rokrokss-mcp-atlassian -v              # Verbose mode
 
 # Git workflow
 git checkout -b feature/description   # New feature

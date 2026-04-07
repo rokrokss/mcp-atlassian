@@ -33,9 +33,9 @@ Add to your Claude Desktop or Cursor MCP configuration:
 ```json
 {
   "mcpServers": {
-    "mcp-atlassian": {
+    "rokrokss-mcp-atlassian": {
       "command": "uvx",
-      "args": ["mcp-atlassian"],
+      "args": ["rokrokss-mcp-atlassian"],
       "env": {
         "JIRA_URL": "https://your-company.atlassian.net",
         "JIRA_USERNAME": "your.email@company.com",
